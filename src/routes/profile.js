@@ -38,6 +38,7 @@ profileRouter.patch('/profile/edit', authentication, async (req, res) => {
       data: loggedInUser,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).send('Updation Error occurred!' + error.message);
   }
 });

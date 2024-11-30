@@ -6,9 +6,6 @@ const validateData = async (data) => {
   } else if (!validator.isEmail(email)) {
     throw new Error('Email is not valid');
   }
-  // else if (!validator.isStrongPassword(password)) {
-  //   throw new Error('Enter the strong password');
-  // }
 };
 
 const validateEditUpdates = async (req) => {

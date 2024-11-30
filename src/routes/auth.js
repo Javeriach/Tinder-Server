@@ -6,6 +6,7 @@ const { validateData } = require('../helpers/Validator');
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+var validator = require('validator');
 
 //=================================Sign Up user
 
@@ -25,16 +26,22 @@ authRouter.post('/auth/signup', async (req, res) => {
       photoUrl: req?.body?.photoUrl,
     };
     const UserInstance = new User(requestedUserData);
-    await UserInstance.save();
-    // throw new Error('Something went wrong');
-    res.send('User added successfully');
+    let resultedUser = await UserInstance.save();
+    const token = await jwt.sign(
+      {
+        email: req?.body?.email,
+      },
+      'OnlyJeaa&*('
+    );
+    res.cookie('token', token, { expire: new Date(Date.now() + 86400000) }); //BITF21M519
+    res.json(resultedUser);
   } catch (err) {
-    res.status(500).send('Error :' + err.message);
+    res.status(500).json({ message: err.message });
   }
 });
 
 //=================================Login User
-authRouter.get('/auth/login', async (req, res) => {
+authRouter.post('/auth/login', async (req, res) => {
   const { password, email } = req.body;
   try {
     if (!password || !email) {
@@ -55,8 +62,8 @@ authRouter.get('/auth/login', async (req, res) => {
       },
       'OnlyJeaa&*('
     );
-    res.cookie('token', token); //BITF21M519
-    res.send('Logged in Successfully' + '   ' + userData);
+    res.cookie('token', token, { expire: new Date(Date.now() + 86400000) }); //BITF21M519
+    res.json(userData);
   } catch (err) {
     res.status(500).send('Error :' + err.message);
   }
@@ -67,21 +74,34 @@ authRouter.post('/auth/logout', async (req, res) => {
   res.send('Logout Successfully');
 });
 
-authRouter.post('/forgetPassword', async (res, req) => {
+authRouter.patch('/forgetPassword', async (req, res) => {
   try {
     const emailId = req.body.emailId;
-    const userData = await User.find({
+    const userData = await User.findOne({
       email: emailId,
     });
     if (!userData) {
       return res.status(400).json({
-        message: 'Invalid Email address!!',
+        message: 'Account with given email not exist!!',
       });
     }
 
     const plainPassword = req.body.password;
+    if (!validator.isStrongPassword(plainPassword)) {
+      return res.status(400).json({
+        message: `Password is not Strong!!Must contain atleast one Capital letter,1 small letter , 1 number and 1 unique character`,
+      });
+    }
+
+    const encryptedPassword = await bcrypt.hash(plainPassword, 10);
+    console.log(userData);
+    userData.password = encryptedPassword;
+    console.log(userData);
+    await userData.save();
+    res.send('Password Updated Successfully!!');
   } catch (error) {
-    res.status(500).send('ERROR: ' + error.message);
+    console.log(error);
+    res.status(500).json({ message: error.message });
   }
 });
 

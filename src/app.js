@@ -6,8 +6,15 @@ const profileRouter = require('./routes/profile');
 const cookieParser = require('cookie-parser');
 const requestRouter = require('./routes/connectionRequest');
 const userRouter = require('./routes/usersConnection');
+const cors = require('cors');
 
 //EXPRESS BUILT IN MIDDLEWARES
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -27,5 +34,6 @@ connectDB()
     });
   })
   .catch((err) => {
+    console.log(err);
     console.log('Database connection failed!!');
   });
