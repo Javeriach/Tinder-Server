@@ -5,6 +5,13 @@ const validateData = async (data) => {
     throw new Error('Name is not valid');
   } else if (!validator.isEmail(email)) {
     throw new Error('Email is not valid');
+  } else if (!validator.isStrongPassword(password)) {
+    throw new Error(`
+      Your passwor is weak!!
+      1-Length must be atleast 8.
+      2-Must have atleast one capital letter
+      3-Must have atleast one small letter
+      4-Must have atleast one digit.`);
   }
 };
 

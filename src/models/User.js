@@ -20,7 +20,7 @@ const userSchema = mongoose.Schema(
       type: String,
       lowercase: true,
       required: true,
-      unique: true,
+      unique: [true, 'User with this email already exist!!!'],
       trim: true,
     },
 
@@ -42,7 +42,7 @@ const userSchema = mongoose.Schema(
 
     about: {
       type: String,
-      default: 'I am the default about',
+      default: 'I am Tinder user!!!',
     },
 
     skills: {
@@ -50,7 +50,7 @@ const userSchema = mongoose.Schema(
     },
 
     photoUrl: {
-      type: String,
+      type: [String, 'Only String is allowed'],
     },
     gender: {
       type: String,

@@ -12,8 +12,13 @@ var validator = require('validator');
 
 authRouter.post('/auth/signup', async (req, res) => {
   try {
-    validateData(req.body);
     const plainPassword = req.body.password;
+    try {
+      await validateData(req.body);
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
+
     const encryptedPassword = await bcrypt.hash(plainPassword, 10);
     const requestedUserData = {
       firstName: req?.body?.firstName,
@@ -51,11 +56,12 @@ authRouter.post('/auth/login', async (req, res) => {
       email,
     });
     if (!userData) {
-      throw new Error('User not exist!!');
+      return res.status(400).json({ message: 'Invalid Email or password!' });
     }
 
     const varifiedPassword = await bcrypt.compare(password, userData.password);
-    if (!varifiedPassword) throw new Error('Password is incorrect!!!');
+    if (!varifiedPassword)
+      return res.status(400).json({ message: 'Invalid Email or password!' });
     const token = await jwt.sign(
       {
         email,
@@ -65,7 +71,7 @@ authRouter.post('/auth/login', async (req, res) => {
     res.cookie('token', token, { expire: new Date(Date.now() + 86400000) }); //BITF21M519
     res.json(userData);
   } catch (err) {
-    res.status(500).send('Error :' + err.message);
+    res.status(500).json({ message: err.message });
   }
 });
 
