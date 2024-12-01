@@ -37,3 +37,5 @@ connectDB()
     console.log(err);
     console.log('Database connection failed!!');
   });
+
+module.exports = app;
