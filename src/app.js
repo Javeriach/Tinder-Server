@@ -11,7 +11,7 @@ const cors = require('cors');
 //EXPRESS BUILT IN MIDDLEWARES
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: 'https://tinder-frontend-code.vercel.app',
     credentials: true,
   })
 );
