@@ -19,7 +19,7 @@ app.use(
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' cdn.example.com https://vercel.live; img-src 'self' img.example.com; style-src 'self';"
+    "default-src 'self'; script-src 'self' https://tinder-frontend-code.vercel.app ; img-src 'self' img.example.com; style-src 'self';"
   );
   next();
 });
