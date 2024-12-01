@@ -1,11 +1,11 @@
 const express = require('express');
 const app = express();
-const connectDB = require('./config/database');
-const authRouter = require('./routes/auth');
-const profileRouter = require('./routes/profile');
+const connectDB = require('./src/config/database');
+const authRouter = require('./src/routes/auth');
+const profileRouter = require('./src/routes/profile');
 const cookieParser = require('cookie-parser');
-const requestRouter = require('./routes/connectionRequest');
-const userRouter = require('./routes/usersConnection');
+const requestRouter = require('./src/routes/connectionRequest');
+const userRouter = require('./src/routes/usersConnection');
 const cors = require('cors');
 
 //EXPRESS BUILT IN MIDDLEWARES
