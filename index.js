@@ -8,14 +8,6 @@ const requestRouter = require('./src/routes/connectionRequest');
 const userRouter = require('./src/routes/usersConnection');
 const cors = require('cors');
 
-//EXPRESS BUILT IN MIDDLEWARES
-app.use(
-  cors({
-    origin: 'https://tinder-frontend-code.vercel.app',
-    credentials: true,
-  })
-);
-
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
@@ -23,6 +15,16 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+//EXPRESS BUILT IN MIDDLEWARES
+app.use(
+  cors({
+    origin: 'http://localhost:7777',
+    credentials: true,
+  })
+);
+
+
 
 app.use(express.json());
 app.use(cookieParser());
