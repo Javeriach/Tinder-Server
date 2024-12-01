@@ -15,6 +15,15 @@ app.use(
     credentials: true,
   })
 );
+
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' cdn.example.com https://vercel.live; img-src 'self' img.example.com; style-src 'self';"
+  );
+  next();
+});
+
 app.use(express.json());
 app.use(cookieParser());
 

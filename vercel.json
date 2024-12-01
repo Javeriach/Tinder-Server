@@ -12,10 +12,5 @@
       "dest": "index.js"
     }
   ],
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
-  ]
+  "Content-Security-Policy": "default-src 'self'; script-src 'self' cdn.example.com; img-src 'self' img.example.com; style-src 'self'"
 }
