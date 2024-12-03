@@ -31,9 +31,11 @@ app.use(cookieParser());
 //EXPRESS ROUTERS
 app.use('/', authRouter); // Routes for authentication
 app.use('/', profileRouter); // Routes for profile management
-app.use('/', requestRouter); // Routes for connection requests
+app.use('/', requestRouter); // Routes for connection resquests
 app.use('/', userRouter); // Routes for user connections
-
+app.all('*', (req, res) => {
+  res.status(200).json({ message: 'I am correct path' });
+});
 //Creating the instace of the User that we want to create and want to add to the database
 
 connectDB()
