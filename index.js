@@ -31,6 +31,7 @@ app.use((req, res, next) => {
       "font-src 'self' data:;", // Allow fonts from self and data URIs
       "frame-src 'self' https://vercel.live;", // Allow framing of content from self and vercel.live
       "frame-ancestors 'none';", // Prevent embedding of your app in other frames
+      'allow-forms; allow-scripts;', // Allow forms and scripts (which may also use cookies)
     ].join(' ')
   );
 
