@@ -8,7 +8,6 @@ const requestRouter = require('./src/routes/connectionRequest');
 const userRouter = require('./src/routes/usersConnection');
 const cors = require('cors');
 
-
 //EXPRESS BUILT IN MIDDLEWARES
 app.use(
   cors({
@@ -16,6 +15,15 @@ app.use(
     credentials: true,
   })
 );
+
+// CSP Middleware for Enhanced Security
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    `default-src 'self'; script-src 'self' https://vercel.live; object-src 'none';`
+  );
+  next();
+});
 
 app.use(express.json());
 app.use(cookieParser());
