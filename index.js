@@ -39,8 +39,6 @@ app.use((req, res, next) => {
   next(); // Pass control to the next middleware
 });
 
-s;
-
 //EXPRESS ROUTERS
 app.use('/', authRouter); // Routes for authentication
 app.use('/', profileRouter); // Routes for profile management
