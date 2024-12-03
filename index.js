@@ -29,10 +29,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 //EXPRESS ROUTERS
-app.use('/', authRouter);
-app.use('/', profileRouter);
-app.use('/', requestRouter);
-app.use('/', userRouter);
+app.use('/auth', authRouter); // Routes for authentication
+app.use('/profile', profileRouter); // Routes for profile management
+app.use('/request', requestRouter); // Routes for connection requests
+app.use('/users', userRouter); // Routes for user connections
 
 //Creating the instace of the User that we want to create and want to add to the database
 
