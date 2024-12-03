@@ -8,13 +8,6 @@ const requestRouter = require('./src/routes/connectionRequest');
 const userRouter = require('./src/routes/usersConnection');
 const cors = require('cors');
 
-app.use((req, res, next) => {
-  res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' https://tinder-frontend-code.vercel.app ; img-src 'self' img.example.com; style-src 'self';"
-  );
-  next();
-});
 
 //EXPRESS BUILT IN MIDDLEWARES
 app.use(
