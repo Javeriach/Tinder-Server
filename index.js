@@ -8,15 +8,15 @@ const requestRouter = require('./src/routes/connectionRequest');
 const userRouter = require('./src/routes/usersConnection');
 const cors = require('cors');
 
-app.use(express.json());
-app.use(cookieParser());
-
 app.use(
   cors({
-    origin: 'https://tinder-frontend-code.vercel.app',
+    origin:'https://tinder-frontend-code.vercel.app',
     credentials: true,
   })
 );
+
+app.use(express.json());
+app.use(cookieParser());
 
 // CSP Middleware for Enhanced Security
 
