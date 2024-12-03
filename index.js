@@ -18,18 +18,19 @@ app.use(
 
 // CSP Middleware for Enhanced Security
 app.use((req, res, next) => {
-  // Setting a strong Content Security Policy
+  // Setting a Content Security Policy to allow framing from vercel.live
   res.setHeader(
     'Content-Security-Policy',
     [
-      "default-src 'self';",
-      "script-src 'self' https://vercel.live;", // Allows scripts from your domain and Vercel live reload
-      "style-src 'self' 'unsafe-inline';", // Allows styles from your domain and inline styles
-      "object-src 'none';", // Disallows <object> tags for security
-      "img-src 'self' data:;", // Allows images from your domain and data URIs
-      "connect-src 'self' https://vercel.live;", // Allows network requests to your domain and Vercel
-      "font-src 'self' data:;", // Allows fonts from your domain and data URIs
-      "frame-ancestors 'none';", // Prevents the app from being embedded in an iframe
+      "default-src 'self';", // Default policy: only allow resources from the same origin
+      "script-src 'self' https://vercel.live;", // Allow scripts from self and vercel.live
+      "style-src 'self' 'unsafe-inline';", // Allow styles from self and inline styles
+      "object-src 'none';", // Disallow <object> and <embed> tags
+      "img-src 'self' data:;", // Allow images from self and data URIs
+      "connect-src 'self' https://vercel.live;", // Allow network requests to self and vercel
+      "font-src 'self' data:;", // Allow fonts from self and data URIs
+      "frame-src 'self' https://vercel.live;", // Allow framing of content from self and vercel.live
+      "frame-ancestors 'none';", // Prevent embedding of your app in other frames
     ].join(' ')
   );
 
