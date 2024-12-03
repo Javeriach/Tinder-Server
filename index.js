@@ -8,6 +8,16 @@ const requestRouter = require('./src/routes/connectionRequest');
 const userRouter = require('./src/routes/usersConnection');
 const cors = require('cors');
 
+app.use(
+  cors({
+    origin: 'https://tinder-frontend-code.vercel.app',
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+app.use(cookieParser());
+
 // CSP Middleware for Enhanced Security
 app.use((req, res, next) => {
   // Setting a Content Security Policy to allow framing from vercel.live
@@ -23,26 +33,13 @@ app.use((req, res, next) => {
       "font-src 'self' data:;", // Allow fonts from self and data URIs
       "frame-src 'self' https://vercel.live;", // Allow framing of content from self and vercel.live
       "frame-ancestors 'none';", // Prevent embedding of your app in other frames
-      'Access-Control-Allow-Credentials: true', // Allow credentials (cookies, etc.) with CORS
-      'Access-Control-Allow-Origin: https://tinder-frontend-code.vercel.app', // Allow requests from your frontend
-      'Access-Control-Allow-Methods: GET, OPTIONS, PATCH, DELETE, POST, PUT', // Allowed HTTP methods
-      'Access-Control-Allow-Headers: *', // Allow all headers
     ].join(' ')
   );
 
   next(); // Pass control to the next middleware
 });
 
-//EXPRESS BUILT IN MIDDLEWARES
-app.use(
-  cors({
-    origin: 'https://tinder-frontend-code.vercel.app',
-    credentials: true,
-  })
-);
-
-app.use(express.json());
-app.use(cookieParser());
+s;
 
 //EXPRESS ROUTERS
 app.use('/', authRouter); // Routes for authentication
