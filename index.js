@@ -10,7 +10,7 @@ const cors = require('cors');
 
 app.use(
   cors({
-    origin: 'https://tinder-frontend-code.vercel.app/',
+    origin: 'https://tinder-frontend-code.vercel.app',
     credentials: true,
   })
 );
