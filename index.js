@@ -19,6 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // CSP Middleware for Enhanced Security
+// CSP Middleware for Enhanced Security
 app.use((req, res, next) => {
   // Setting a Content Security Policy to allow framing from vercel.live
   res.setHeader(
