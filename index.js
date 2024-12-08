@@ -10,7 +10,7 @@ const cors = require('cors');
 
 app.use(
   cors({
-    origin:'https://tinder-frontend-code.vercel.app',
+    origin: 'http://localhost:5173',
     credentials: true,
   })
 );
@@ -38,7 +38,6 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.log(err);
     console.log('Database connection failed!!');
   });
 
