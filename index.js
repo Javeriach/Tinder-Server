@@ -10,7 +10,7 @@ const cors = require('cors');
 
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: 'https://tinder-frontend-code-bvpx.vercel.app',
     credentials: true,
   })
 );
