@@ -64,6 +64,7 @@ requestRouter.post(
           : `${senderData.firstName} ${senderData.lastName}! You have ignored ${receiverData.firstName} ${receiverData.lastName}`
       );
 
+      console.log(sendRes);
       //WE ARE SENDING BACK THE RESPONCE IN JSON FORMAT
       res.json({
         message:
