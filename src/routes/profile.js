@@ -65,9 +65,9 @@ profileRouter.patch(
         throw new Error('Invalid Password!');
       }
       const password = req.body.password;
-      console.log(password);
+
       let hashedPassword = await bcrypt.hash(password, 10);
-      console.log(hashedPassword);
+
       let loggedInUser = req.body.userData;
 
       loggedInUser['password'] = hashedPassword;

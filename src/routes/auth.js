@@ -1,10 +1,8 @@
 const express = require('express');
 const authRouter = express.Router();
 const User = require('../models/User');
-const authentication = require('../MiddleWares/auth');
 const { validateData } = require('../helpers/Validator');
 const bcrypt = require('bcrypt');
-const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 var validator = require('validator');
 
@@ -36,7 +34,7 @@ authRouter.post('/auth/signup', async (req, res) => {
       {
         email: req?.body?.email,
       },
-      'OnlyJeaa&*('
+      process.env.JWT_TOKEN
     );
     res.cookie('token', token, { expire: new Date(Date.now() + 86400000) }); //BITF21M519
     res.json(resultedUser);
@@ -66,7 +64,7 @@ authRouter.post('/auth/login', async (req, res) => {
       {
         email,
       },
-      'OnlyJeaa&*('
+      process.env.JWT_TOKEN
     );
     res.cookie('token', token, { expire: new Date(Date.now() + 86400000) }); //BITF21M519
     res.json(userData);
@@ -100,9 +98,9 @@ authRouter.patch('/forgetPassword', async (req, res) => {
     }
 
     const encryptedPassword = await bcrypt.hash(plainPassword, 10);
-    console.log(userData);
+
     userData.password = encryptedPassword;
-    console.log(userData);
+
     await userData.save();
     res.send('Password Updated Successfully!!');
   } catch (error) {

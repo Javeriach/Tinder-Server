@@ -3,6 +3,7 @@ const requestRouter = express.Router();
 const authentication = require('../MiddleWares/auth');
 const ConnectionRequest = require('../models/connectionrequest');
 const User = require('../models/User');
+const sendEmail = require('../helpers/sendEmail');
 
 requestRouter.post(
   '/request/send/:status/:toUserId',
@@ -55,6 +56,15 @@ requestRouter.post(
 
       //LETS SAVE IT TO THE DATABASE
       const resultData = await newConnectionRequest.save();
+      //NOW WE ARE SENDING THE EMAIL TO THE OWNER BY USING SENDEMAIL FROM AWS
+      const sendRes = await sendEmail.run(
+        'Tinder Connection Request',
+        status === 'interested'
+          ? `${senderData.firstName}! Your are interested in ${receiverData.firstName} ${receiverData.lastName}`
+          : `${senderData.firstName} ${senderData.lastName}! You have ignored ${receiverData.firstName} ${receiverData.lastName}`
+      );
+
+      //WE ARE SENDING BACK THE RESPONCE IN JSON FORMAT
       res.json({
         message:
           status === 'interested'
@@ -63,6 +73,7 @@ requestRouter.post(
         data: resultData,
       });
     } catch (error) {
+      console.log(error);
       res.status(500).send('Error :' + error.message);
     }
   }

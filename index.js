@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const connectDB = require('./src/config/database');
@@ -10,7 +11,7 @@ const cors = require('cors');
 
 app.use(
   cors({
-    origin: 'https://tinder-frontend-code-bvpx.vercel.app',
+    origin: 'http://localhost:5173',
     credentials: true,
   })
 );
@@ -33,7 +34,7 @@ app.all('*', (req, res) => {
 connectDB()
   .then(() => {
     console.log('App successfully conected to the database');
-    app.listen(7777, () => {
+    app.listen(8888, () => {
       console.log('Server started to listrning');
     });
   })
