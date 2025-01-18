@@ -34,12 +34,12 @@ app.all('*', (req, res) => {
 connectDB()
   .then(() => {
     console.log('App successfully conected to the database');
-    app.listen(8888, () => {
+    app.listen(7777, () => {
       console.log('Server started to listrning');
     });
   })
   .catch((err) => {
     console.log('Database connection failed!!');
   });
-
+s;
 module.exports = app;
