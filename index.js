@@ -41,5 +41,5 @@ connectDB()
   .catch((err) => {
     console.log('Database connection failed!!');
   });
-s;
+
 module.exports = app;
