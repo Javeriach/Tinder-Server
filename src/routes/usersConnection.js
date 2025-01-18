@@ -62,7 +62,7 @@ userRouter.get(
 );
 
 userRouter.get('/feed', authentication, async (req, res) => {
-  const USER_SAFE_DATA = 'firstName lastName photoUrl skills about';
+  const USER_SAFE_DATA = 'firstName lastName photoUrl skills about age gender';
   const page = req.query.page || 1;
   let limit = req.query.limit || 10;
   limit = limit > 50 ? 50 : limit;
