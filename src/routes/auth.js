@@ -110,3 +110,4 @@ authRouter.patch('/forgetPassword', async (req, res) => {
 });
 
 module.exports = authRouter;
+console.log(process.env.JWT_TOKEN);
