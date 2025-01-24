@@ -7,7 +7,9 @@ const profileRouter = require('./src/routes/profile');
 const cookieParser = require('cookie-parser');
 const requestRouter = require('./src/routes/connectionRequest');
 const userRouter = require('./src/routes/usersConnection');
+const paymentRouter = require('./src/routes/payment.js');
 const cors = require('cors');
+require('./src/helpers/cronjobs');
 
 app.use(
   cors({
@@ -26,6 +28,8 @@ app.use('/', authRouter); // Routes for authentication
 app.use('/', profileRouter); // Routes for profile management
 app.use('/', requestRouter); // Routes for connection resquests
 app.use('/', userRouter); // Routes for user connections
+app.use('/', paymentRouter); // Routes for payment
+
 app.all('*', (req, res) => {
   res.status(404).json({ message: 'Path not found!!' });
 });
