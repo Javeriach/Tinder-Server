@@ -75,21 +75,27 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
       //CHECK VALIDITY
       res.status(400).json({ msg: error.message });
     }
-    console.log(isValidWebhook);
     const paymentDetails = req.body.payload.payment.entity; // FETCH PAYPMENT DETAILS FROM REQUEST BODY
 
     //WE HAVE TO UPDATE THE STATUS IN OUR DATABASE
-    console.log(paymentDetails);
     const payment = await Payment.findOne({ orderId: paymentDetails.order_id });
     payment.status = paymentDetails.status;
     await payment.save();
-    console.log('Payment Updated');
     //USER DETAILS UPDATION
     const user = await User.findOne({ _id: payment.userId });
     user.isPremium = true;
     user.membershipType = payment.notes.membershipType;
     await user.save();
-    console.log('User saved');
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+});
+
+//API TO VERIFY EITHER THE CURRENT USER IS A PREMIUM USER OR NOT
+paymentRouter.get('/premium/verify', authentication, async (req, res) => {
+  try {
+    const user = req.body.userData.toJSON();
+    res.json({ ...user });
   } catch (error) {
     res.status(500).json({ msg: error.message });
   }

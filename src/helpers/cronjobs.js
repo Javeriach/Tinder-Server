@@ -12,9 +12,6 @@ cron.schedule(' 23 9 * * * *', async () => {
   const startingTime = startOfDay(yesterday); // Start of the previous day (12:00 AM)
   const endingTime = endOfDay(yesterday); // End of the previous day (11:59:59 PM)
 
-  console.log('Starting Time:', startingTime);
-  console.log('Ending Time:', endingTime);
-
   try {
     // Fetch pending connection requests created within the previous day
     const pendingRequests = await ConnectionRequest.find({

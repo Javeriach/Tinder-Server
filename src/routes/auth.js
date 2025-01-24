@@ -74,7 +74,11 @@ authRouter.post('/auth/login', async (req, res) => {
 });
 
 authRouter.post('/auth/logout', async (req, res) => {
-  res.cookie('token', null, { expires: new Date(Date.now()) });
+  res.cookie('token', null, {
+    expires: new Date(0), // Set expiration to Unix epoch time (Jan 1, 1970)
+    path: '/', // Ensure the cookie is deleted for the entire domain
+    httpOnly: true,
+  });
   res.send('Logout Successfully');
 });
 
@@ -110,4 +114,3 @@ authRouter.patch('/forgetPassword', async (req, res) => {
 });
 
 module.exports = authRouter;
-console.log(process.env.JWT_TOKEN);
