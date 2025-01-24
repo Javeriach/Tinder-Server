@@ -95,4 +95,14 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
   }
 });
 
+//API TO VERIFY EITHER THE CURRENT USER IS A PREMIUM USER OR NOT
+paymentRouter.get('/premium/verify', authentication, async (req, res) => {
+  try {
+    const user = req.body.userData.toJSON();
+    res.json({ ...user });
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+});
+
 module.exports = paymentRouter;
