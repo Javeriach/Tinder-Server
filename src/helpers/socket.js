@@ -132,7 +132,7 @@ const initializeSocket = (server) => {
           console.log('Message sent to room:', userId, targetUserId, roomId);
           console.log(`Message sent to room ${roomId}: ${msgText}`);
         } catch (error) {
-          io.to(userSocketMap[targetUserId]).emit(
+          io.to(userSocketMap[userId]).emit(
             'ImageProblem',
             'Network Error'
           );
