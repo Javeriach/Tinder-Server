@@ -4,6 +4,7 @@ const authentication = async (req, res, next) => {
   const { token } = req.cookies;
   try {
     if (!token) {
+      //
       return res.status(401).send('Please Login!!');
     } else {
       const encodedMessage = await jwt.verify(token, 'OnlyJeaa&*(');

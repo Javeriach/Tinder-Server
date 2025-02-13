@@ -115,6 +115,9 @@ const initializeSocket = (server) => {
               imageURL:
                 populatedChat.messages[populatedChat.messages.length - 1]
                   .imageURL,
+              createdAt:
+                populatedChat.messages[populatedChat.messages.length - 1]
+                  .createdAt,
             },
             latestTimestamp: new Date().toISOString(),
           };
