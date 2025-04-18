@@ -32,6 +32,13 @@ userRouter.get(
   '/request/connections/Accepted',
   authentication,
   async (req, res) => {
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader(
+      'Access-Control-Allow-Origin',
+      'https://tinder-frontend-code-bvpx.vercel.app'
+    );
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     try {
       const loggedInUser = req.body.userData;
       const USER_SAFE_DATA = 'firstName lastName photoUrl skills about';
@@ -62,6 +69,13 @@ userRouter.get(
 );
 
 userRouter.get('/feed', authentication, async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader(
+    'Access-Control-Allow-Origin',
+    'https://tinder-frontend-code-bvpx.vercel.app'
+  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   const USER_SAFE_DATA = 'firstName lastName photoUrl skills about age gender';
   const page = req.query.page || 1;
   let limit = req.query.limit || 10;

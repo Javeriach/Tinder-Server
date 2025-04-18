@@ -11,6 +11,14 @@ chatRouter.get(
   '/oneUserchat/:targetUserId',
   authentication,
   async (req, res) => {
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader(
+      'Access-Control-Allow-Origin',
+      'https://tinder-frontend-code-bvpx.vercel.app'
+    );
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
     let { targetUserId } = req.params;
     let page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 300;
@@ -151,6 +159,13 @@ chatRouter.get(
 
 //ROUTE TO GET ALL CHAT CONTACTS
 chatRouter.get('/contacts', authentication, async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader(
+    'Access-Control-Allow-Origin',
+    'https://tinder-frontend-code-bvpx.vercel.app'
+  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   try {
     const contacts = await Chat.aggregate([
       {
