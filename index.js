@@ -17,7 +17,8 @@ require('./src/helpers/cronjobs');
 
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin:
+      'https://tinder-frontend-code-j8wa-8bnuilt9e-javeriachs-projects.vercel.app',
     credentials: true,
   })
 );
