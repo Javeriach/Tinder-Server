@@ -17,7 +17,8 @@ require('./src/helpers/cronjobs');
 
 app.use(
   cors({
-    origin: 'https://tinder-frontend-code-bvpx.vercel.app',
+    origin:
+      'https://corsproxy.io/?https://tinder-frontend-code-bvpx.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
   })
