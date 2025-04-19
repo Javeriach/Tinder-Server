@@ -9,13 +9,13 @@ var validator = require('validator');
 
 //GETTING THE USER DATA FROM THE DATABASE
 profileRouter.get('/profile/view', authentication, async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader(
-    'Access-Control-Allow-Origin',
-    'https://tinder-frontend-code-bvpx.vercel.app'
-  );
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // res.setHeader('Access-Control-Allow-Credentials', true);
+  // res.setHeader(
+  //   'Access-Control-Allow-Origin',
+  //   'https://tinder-frontend-code-bvpx.vercel.app'
+  // );
+  // res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   try {
     const user = req.body.userData;
@@ -28,13 +28,13 @@ profileRouter.get('/profile/view', authentication, async (req, res) => {
 
 //PROFILE EDIT
 profileRouter.patch('/profile/edit', authentication, async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader(
-    'Access-Control-Allow-Origin',
-    'https://tinder-frontend-code-bvpx.vercel.app'
-  );
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // res.setHeader('Access-Control-Allow-Credentials', true);
+  // res.setHeader(
+  //   'Access-Control-Allow-Origin',
+  //   'https://tinder-frontend-code-bvpx.vercel.app'
+  // );
+  // res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   try {
     if (!validateEditUpdates(req)) {
@@ -63,13 +63,13 @@ profileRouter.patch('/profile/edit', authentication, async (req, res) => {
 
 //DELETING THE USER FROM THE DATABASE
 profileRouter.delete('/profile/delete', authentication, async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader(
-    'Access-Control-Allow-Origin',
-    'https://tinder-frontend-code-bvpx.vercel.app'
-  );
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // res.setHeader('Access-Control-Allow-Credentials', true);
+  // res.setHeader(
+  //   'Access-Control-Allow-Origin',
+  //   'https://tinder-frontend-code-bvpx.vercel.app'
+  // );
+  // res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   try {
     const deleteresult = await User.deleteOne(req.body.userData);
