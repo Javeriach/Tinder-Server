@@ -22,7 +22,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin:
-      'https://corsproxy.io/?https://tinder-frontend-code-bvpx.vercel.app',
+      'https://tinder-frontend-code-bvpx.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
   })
