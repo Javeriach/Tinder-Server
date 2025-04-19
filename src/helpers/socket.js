@@ -7,6 +7,7 @@ const initializeSocket = (server) => {
   const io = socket(server, {
     cors: {
       origin: 'https://tinder-frontend-code-bvpx.vercel.app',
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     },
   });
 
