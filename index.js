@@ -15,8 +15,6 @@ const http = require('http');
 const cors = require('cors');
 require('./src/helpers/cronjobs');
 
-app.use(express.json());
-app.use(cookieParser());
 
 
 app.use(
@@ -27,6 +25,8 @@ app.use(
     credentials: true,
   })
 );
+app.use(express.json());
+app.use(cookieParser());
 
 
 // CSP Middleware for Enhanced Security
