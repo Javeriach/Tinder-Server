@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const initializeSocket = (server) => {
   const io = socket(server, {
     cors: {
-      origin: 'http://localhost:5173',
+      origin: 'https://tinder-frontend-code-bvpx.vercel.app',
     },
   });
 
@@ -132,10 +132,7 @@ const initializeSocket = (server) => {
           console.log('Message sent to room:', userId, targetUserId, roomId);
           console.log(`Message sent to room ${roomId}: ${msgText}`);
         } catch (error) {
-          io.to(userSocketMap[userId]).emit(
-            'ImageProblem',
-            'Network Error'
-          );
+          io.to(userSocketMap[userId]).emit('ImageProblem', 'Network Error');
           console.error('Error in message handling:', error);
         }
       }
