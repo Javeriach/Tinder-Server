@@ -51,13 +51,13 @@ authRouter.post('/auth/signup', async (req, res) => {
 
 //=================================Login User
 authRouter.post('/auth/login', async (req, res) => {
-  // res.setHeader('Access-Control-Allow-Credentials', true);
-  // res.setHeader(
-  //   'Access-Control-Allow-Origin',
-  //   'https://tinder-frontend-code-bvpx.vercel.app'
-  // );
-  // res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader(
+    'Access-Control-Allow-Origin',
+    'https://tinder-frontend-code-bvpx.vercel.app'
+  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   const { password, email } = req.body;
   try {
     if (!password || !email) {
@@ -92,13 +92,13 @@ authRouter.post('/auth/login', async (req, res) => {
 });
 
 authRouter.post('/auth/logout', async (req, res) => {
-  // res.setHeader('Access-Control-Allow-Credentials', true);
-  // res.setHeader(
-  //   'Access-Control-Allow-Origin',
-  //   'https://tinder-frontend-code-bvpx.vercel.app'
-  // );
-  // res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader(
+    'Access-Control-Allow-Origin',
+    'https://tinder-frontend-code-bvpx.vercel.app'
+  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   res.cookie('token', null, {
     expires: new Date(0), // Set expiration to Unix epoch time (Jan 1, 1970)
@@ -109,13 +109,13 @@ authRouter.post('/auth/logout', async (req, res) => {
 });
 
 authRouter.patch('/forgetPassword', async (req, res) => {
-  // res.setHeader('Access-Control-Allow-Credentials', true);
-  // res.setHeader(
-  //   'Access-Control-Allow-Origin',
-  //   'https://tinder-frontend-code-bvpx.vercel.app'
-  // );
-  // res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader(
+    'Access-Control-Allow-Origin',
+    'https://tinder-frontend-code-bvpx.vercel.app'
+  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   try {
     const emailId = req.body.emailId;
