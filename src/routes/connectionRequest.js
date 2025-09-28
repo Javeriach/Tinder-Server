@@ -9,14 +9,8 @@ requestRouter.post(
   '/request/send/:status/:toUserId',
   authentication,
   async (req, res) => {
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader(
-      'Access-Control-Allow-Origin',
-      'https://tinder-frontend-code-bvpx.vercel.app'
-    );
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    try {
+
+     try {
       const fromUserId = req.body.userData._id;
       const toUserId = req.params.toUserId;
       const status = req.params.status;
@@ -94,13 +88,6 @@ requestRouter.post(
   '/request/review/:status/:requestId',
   authentication,
   async (req, res) => {
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader(
-      'Access-Control-Allow-Origin',
-      'https://tinder-frontend-code-bvpx.vercel.app'
-    );
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     try {
       const allowedStatus = ['accepted', 'rejected'];
       const requestId = req.params.requestId;

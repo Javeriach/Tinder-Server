@@ -11,13 +11,7 @@ const {
 } = require('razorpay/dist/utils/razorpay-utils.js');
 
 paymentRouter.post('/payment/create', authentication, async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader(
-    'Access-Control-Allow-Origin',
-    'https://tinder-frontend-code-bvpx.vercel.app'
-  );
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
 
   const { firstName, lastName, email } = req.body.userData;
   const membershipType = req?.body?.membershipType;
@@ -70,13 +64,6 @@ paymentRouter.post('/payment/create', authentication, async (req, res) => {
 });
 
 paymentRouter.post('/payment/webhook', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader(
-    'Access-Control-Allow-Origin',
-    'https://tinder-frontend-code-bvpx.vercel.app'
-  );
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   try {
     const webhookSignature = req.get('X-Razorpay-Signature');
@@ -109,13 +96,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 
 //API TO VERIFY EITHER THE CURRENT USER IS A PREMIUM USER OR NOT
 paymentRouter.get('/premium/verify', authentication, async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader(
-    'Access-Control-Allow-Origin',
-    'https://tinder-frontend-code-bvpx.vercel.app'
-  );
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
 
   try {
     const user = req.body.userData.toJSON();
@@ -127,13 +108,7 @@ paymentRouter.get('/premium/verify', authentication, async (req, res) => {
 
 //API TO VERIFY EITHER THE CURRENT USER IS A PREMIUM USER OR NOT
 paymentRouter.get('/premium/verify', authentication, async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader(
-    'Access-Control-Allow-Origin',
-    'https://tinder-frontend-code-bvpx.vercel.app'
-  );
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   try {
     const user = req.body.userData.toJSON();
     res.json({ ...user });

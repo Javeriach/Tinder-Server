@@ -41,6 +41,12 @@ const createSendEmailCommand = (toAddress, fromAddress, subject, body) => {
 
 ///now we will call the above function is async function
 const run = async (subject, body) => {
+  // Check if AWS credentials are available
+  if (!process.env.AWS_ACCESS_KEYS || !process.env.AWS_SECRET_KEYS) {
+    console.warn('AWS credentials not found. Email sending disabled.');
+    return { message: 'Email sending disabled - AWS credentials not configured' };
+  }
+
   const sendEmailCommand = createSendEmailCommand(
     'javeriakanwal57@gmail.com',
     'javeriakanwal383@gmail.com',
@@ -55,7 +61,8 @@ const run = async (subject, body) => {
       const messageRejectedError = caught;
       return messageRejectedError;
     }
-    throw caught;
+    console.error('Email sending failed:', caught.message);
+    return { error: 'Email sending failed', details: caught.message };
   }
 };
 
