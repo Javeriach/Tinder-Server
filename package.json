@@ -7,7 +7,9 @@
     "node": "22.x"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
+    "email:test": "node scripts/sendTestEmail.js",
+    "payment:test": "node scripts/createTestCheckout.js",
     "start": "node index.js",
     "dev": "nodemon index.js",
     "kill-port": "lsof -ti:7777 | xargs kill -9 || echo 'No processes found on port 7777'",
@@ -16,7 +18,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-ses": "^3.730.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.5.1",
     "cookie-parser": "^1.4.7",
@@ -27,9 +28,11 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.1",
     "node-cron": "^3.0.3",
-    "razorpay": "^2.9.5",
+    "nodemailer": "^9.1.0",
+    "resend": "^4.8.0",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
+    "stripe": "^22.6.0",
     "validator": "^13.12.0"
   }
 }

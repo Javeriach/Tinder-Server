@@ -2,11 +2,12 @@ const socket = require('socket.io');
 const { Chat } = require('../models/TwoPersonChat');
 const cloudinary = require('../lib/cloudinary');
 const mongoose = require('mongoose');
+const { allowedOrigins } = require('../config/cors');
 
 const initializeSocket = (server) => {
   const io = socket(server, {
     cors: {
-      origin: 'http://localhost:5173',
+      origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       credentials: true,
     },

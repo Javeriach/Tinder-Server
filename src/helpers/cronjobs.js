@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const sendEmail = require('./sendEmail.js');
+const { renderEmail, appUrl } = require('./emailTemplate.js');
 const { startOfDay, endOfDay, subDays } = require('date-fns'); // Import necessary functions
 const ConnectionRequest = require('../models/connectionrequest.js');
 
@@ -7,9 +8,10 @@ const ConnectionRequest = require('../models/connectionrequest.js');
 cron.schedule(' 23 9 * * * *', async () => {
   console.log('Cron job started - checking for pending connection requests');
 
-  // Check if AWS credentials are available before running email tasks
-  if (!process.env.AWS_ACCESS_KEYS || !process.env.AWS_SECRET_KEYS) {
-    console.warn('AWS credentials not found. Skipping email cron job.');
+  // Check an email transport is configured before running email tasks
+  const hasGmail = process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD;
+  if (!hasGmail && !process.env.RESEND_API_KEY) {
+    console.warn('No email transport configured. Skipping email cron job.');
     return;
   }
 
@@ -35,13 +37,27 @@ cron.schedule(' 23 9 * * * *', async () => {
     console.log(`Found ${listofEmails.length} emails to send notifications to`);
 
     //FOR LOOP USED TO SEND EMAILS IN SYCHRONOUS WAY-GOOD FOR LESS NO OF EMAILS LIKE 200
+    const reviewUrl = `${appUrl()}/requests`;
+
     for (const email of listofEmails) {
       const result = await sendEmail.run(
-        'Connection Requests Sent to ' +
-          email +
-          '.There are so many requests are pending. Kindly open the Tinder and review these requests.'
+        'You have pending connection requests on Tinder',
+        `You have connection requests waiting for your review. ` +
+          `Sign in to Tinder to accept or ignore them.\n\n${reviewUrl}`,
+        {
+          to: email,
+          html: renderEmail({
+            heading: 'You have pending connection requests',
+            preheader: 'Someone is waiting to connect with you on Tinder',
+            body: [
+              `You have one or more connection requests waiting for your review.`,
+              `Sign in to Tinder to accept or ignore them.`,
+            ],
+            cta: { label: 'Review requests', url: reviewUrl },
+          }),
+        }
       );
-      
+
       if (result.error) {
         console.error(`Failed to send email to ${email}:`, result.error);
       } else {

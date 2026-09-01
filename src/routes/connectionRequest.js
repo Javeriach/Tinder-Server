@@ -4,6 +4,7 @@ const authentication = require('../MiddleWares/auth');
 const ConnectionRequest = require('../models/connectionrequest');
 const User = require('../models/User');
 const sendEmail = require('../helpers/sendEmail');
+const { renderEmail, appUrl } = require('../helpers/emailTemplate');
 
 requestRouter.post(
   '/request/send/:status/:toUserId',
@@ -57,13 +58,40 @@ requestRouter.post(
 
       //LETS SAVE IT TO THE DATABASE
       const resultData = await newConnectionRequest.save();
-      //NOW WE ARE SENDING THE EMAIL TO THE OWNER BY USING SENDEMAIL FROM AWS
-      const sendRes = await sendEmail.run(
-        'Tinder Connection Request',
-        status === 'interested'
-          ? `${senderData.firstName}! Your are interested in ${receiverData.firstName} ${receiverData.lastName}`
-          : `${senderData.firstName} ${senderData.lastName}! You have ignored ${receiverData.firstName} ${receiverData.lastName}`
-      );
+
+      //NOTIFY THE RECEIVER BY EMAIL - only for a real connection request
+      //("interested"). A left-swipe ("ignored") is silent.
+      if (status === 'interested' && receiverData.email) {
+        const senderName = `${senderData.firstName} ${senderData.lastName}`;
+        const reviewUrl = `${appUrl()}/requests`;
+
+        const subject = `${senderData.firstName} sent you a connection request on Tinder`;
+        const text =
+          `Hi ${receiverData.firstName},\n\n` +
+          `${senderName} is interested in connecting with you on Tinder. ` +
+          `Sign in to review the request and choose to accept or ignore it.\n\n` +
+          `${reviewUrl}`;
+
+        // Fire-and-forget: a failed email must not fail the request.
+        sendEmail
+          .run(subject, text, {
+            to: receiverData.email,
+            html: renderEmail({
+              heading: 'You have a new connection request',
+              preheader: `${senderName} is interested in connecting with you on Tinder`,
+              body: [
+                `Hi ${receiverData.firstName},`,
+                `<strong>${senderName}</strong> is interested in connecting with you on Tinder.`,
+                `Sign in to review the request — you can accept it or ignore it.`,
+              ],
+              cta: { label: 'Review request', url: reviewUrl },
+            }),
+          })
+          .then((r) => {
+            if (r && r.error) console.error('Connection-request email failed:', r.details);
+          })
+          .catch((e) => console.error('Connection-request email failed:', e.message));
+      }
 
       //WE ARE SENDING BACK THE RESPONCE IN JSON FORMAT
       res.json({

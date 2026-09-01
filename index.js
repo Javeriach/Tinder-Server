@@ -13,7 +13,8 @@ const chatRouter = require('./src/routes/chat');
 
 const http = require('http');
 const cors = require('cors');
-require('./src/helpers/cronjobs'); // Cron jobs with AWS credential checks
+const { allowedOrigins } = require('./src/config/cors');
+require('./src/helpers/cronjobs'); // Cron jobs with Resend API key checks
 
 // Validate required environment variables
 const requiredEnvVars = ['MONGODB_CONNECTION_STRING', 'JWT_TOKEN'];
@@ -26,11 +27,15 @@ if (missingEnvVars.length > 0) {
 
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
   })
 );
+// Stripe webhooks need the untouched raw body for signature verification,
+// so this must be registered before the JSON body parser.
+app.use('/payment/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 app.use(cookieParser());
 
