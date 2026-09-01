@@ -1,93 +1,119 @@
-const socket = require('socket.io');
+const { Server } = require('socket.io');
+const { createAdapter } = require('@socket.io/redis-adapter');
+const { createClient } = require('redis');
 const { Chat } = require('../models/TwoPersonChat');
 const cloudinary = require('../lib/cloudinary');
-const mongoose = require('mongoose');
 const { allowedOrigins } = require('../config/cors');
 
-const initializeSocket = (server) => {
-  const io = socket(server, {
+// Redis SET holding the ids of currently-online users.
+const ONLINE_KEY = 'tinder:online_users';
+
+// A single WebSocket connection is pinned to one serverless instance, but two
+// users in the same chat can land on different instances. The Redis adapter
+// makes `io.to(room).emit(...)` reach sockets on every instance, and the shared
+// SET makes the online-users list consistent. Locally (no REDIS_URL) we fall
+// back to in-process state, which is fine for one always-on server.
+const initializeSocket = async (server) => {
+  const io = new Server(server, {
     cors: {
       origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       credentials: true,
     },
+    transports: ['websocket', 'polling'],
   });
 
-  const userSocketMap = {}; //TO STORE ONLINE USERS
+  let redis = null;
+  const localOnline = new Set();
+
+  if (process.env.REDIS_URL) {
+    try {
+      const pubClient = createClient({ url: process.env.REDIS_URL });
+      const subClient = pubClient.duplicate();
+      pubClient.on('error', (e) => console.error('Redis pub error:', e.message));
+      subClient.on('error', (e) => console.error('Redis sub error:', e.message));
+      await Promise.all([pubClient.connect(), subClient.connect()]);
+      io.adapter(createAdapter(pubClient, subClient));
+      redis = pubClient; // a normal client - fine for SET commands
+      console.log('Socket.IO Redis adapter connected');
+    } catch (err) {
+      console.error('Redis adapter setup failed, using in-memory state:', err.message);
+    }
+  } else {
+    console.warn('REDIS_URL not set - Socket.IO running single-instance only');
+  }
+
+  const addOnline = async (userId) =>
+    redis ? redis.sAdd(ONLINE_KEY, userId) : localOnline.add(userId);
+  const removeOnline = async (userId) =>
+    redis ? redis.sRem(ONLINE_KEY, userId) : localOnline.delete(userId);
+  const getOnline = async () =>
+    redis ? redis.sMembers(ONLINE_KEY) : [...localOnline];
+  const broadcastOnline = async () => {
+    try {
+      io.emit('getOnlineUsers', await getOnline());
+    } catch (e) {
+      console.error('broadcastOnline failed:', e.message);
+    }
+  };
 
   io.on('connection', (socket) => {
-    console.log('A user connected ', socket.id);
-
-    //-=====TO GET ONLINE USERS
     const userId = socket.handshake.query.userId;
-    console.log('--------', userId);
-    if (userId) {
-      userSocketMap[userId] = socket.id;
-    }
-    console.log(Object.keys(userSocketMap));
-    io.emit('getOnlineUsers', Object.keys(userSocketMap));
+    console.log('A user connected', socket.id, userId);
 
-    //======JOIN CHAT
-    socket.on('joinChat', ({ userId, targetUserId }) => {
-      if (!userId || !targetUserId) {
-        console.error('Invalid user IDs received.');
-        return;
-      }
-      // Create a unique room ID based on user IDs
-      const roomId = [userId, targetUserId].sort().join('_');
+    if (userId) {
+      // Personal room: every socket this user opens joins it, so a message can
+      // be delivered with io.to(`user:<id>`) regardless of which instance holds
+      // the target socket.
+      socket.join(`user:${userId}`);
+      addOnline(userId).then(broadcastOnline).catch(() => {});
+    }
+
+    socket.on('joinChat', ({ userId: u, targetUserId }) => {
+      if (!u || !targetUserId) return;
+      const roomId = [u, targetUserId].sort().join('_');
       socket.join(roomId);
-      console.log(`User ${userId} joined room: ${roomId}`);
     });
 
     socket.on(
       'sendMessage',
-      async ({ userId, targetUserId, msgText, imageUrl: msg_Image }) => {
+      async ({ userId: fromId, targetUserId, msgText, imageUrl: msg_Image }) => {
         try {
-          if (!userId || !targetUserId || (!msgText && !msg_Image)) {
+          if (!fromId || !targetUserId || (!msgText && !msg_Image)) {
             console.error('Invalid message data received.');
             return;
           }
 
-          console.log('HI========');
-          //=======UPLOAD IMAGE TO CLOUDINARY=========================
           let image_url = '';
           if (msg_Image) {
             const uploadResponse = await cloudinary.uploader.upload(msg_Image);
             image_url = uploadResponse.secure_url;
           }
 
-          //=======CREATE A UNIQUE ROOM ID FOR CHAT====================
-          const roomId = [userId, targetUserId].sort().join('_');
+          const roomId = [fromId, targetUserId].sort().join('_');
 
-          //=========FIND THE CHAT WITH BOTH PARTICIPANTS===============
-          let chat = await Chat.findOne(
-            {
-              participants: { $all: [userId, targetUserId] },
-              roomId: { $eq: roomId },
-            } //  Find chat with both participants
-          );
+          let chat = await Chat.findOne({
+            participants: { $all: [fromId, targetUserId] },
+            roomId: { $eq: roomId },
+          });
 
           if (!chat) {
             chat = await Chat({
-              participants: [userId, targetUserId],
+              participants: [fromId, targetUserId],
               messages: [],
-              roomId: roomId,
+              roomId,
             });
-
             await chat.save();
           }
-          //=======PUSH THE NEW MESSAGE TO CHAT=========================
+
           chat.messages.push({
-            senderId: userId,
+            senderId: fromId,
             text: msgText,
             imageURL: image_url,
-            timestamp: new Date(), // Add timestamp for the message
+            timestamp: new Date(),
           });
-
-          //=====SAVE THE CHAT WITH NEW MESSAGE=========================
           chat = await chat.save();
 
-          //=======POPULATE THE CHAT WITH SENDER AND PARTICIPANTS DATA=====
           const populatedChat = await Chat.findById(chat._id)
             .populate({
               path: 'messages.senderId',
@@ -99,53 +125,49 @@ const initializeSocket = (server) => {
             });
 
           const filteredContacts = populatedChat.participants.filter(
-            (person) => {
-              console.log(person._id, targetUserId);
-              return person._id.toString() === targetUserId;
-            }
+            (person) => person._id.toString() === targetUserId
           );
+          const last =
+            populatedChat.messages[populatedChat.messages.length - 1];
 
-          //=====PREPARE THE MESSAGE TO SEND============
           const savedMessage = {
             ContactData: filteredContacts[0],
-            roomId: roomId,
+            roomId,
             newMessage: {
-              text: populatedChat.messages[populatedChat.messages.length - 1]
-                .text,
-              senderId:
-                populatedChat.messages[populatedChat.messages.length - 1]
-                  .senderId,
-              imageURL:
-                populatedChat.messages[populatedChat.messages.length - 1]
-                  .imageURL,
-              createdAt:
-                populatedChat.messages[populatedChat.messages.length - 1]
-                  .createdAt,
+              text: last.text,
+              senderId: last.senderId,
+              imageURL: last.imageURL,
+              createdAt: last.createdAt,
             },
             latestTimestamp: new Date().toISOString(),
           };
 
-          //====EMIT THE MESSAGE TO THE ROOM=========
-          io.to(userSocketMap[userId]).emit('messageReceived', savedMessage);
-          io.to(userSocketMap[targetUserId]).emit(
-            'messageReceived',
-            savedMessage
-          );
+          io.to(`user:${fromId}`).emit('messageReceived', savedMessage);
+          io.to(`user:${targetUserId}`).emit('messageReceived', savedMessage);
 
-          console.log('Message sent to room:', userId, targetUserId, roomId);
-          console.log(`Message sent to room ${roomId}: ${msgText}`);
+          console.log(`Message sent in room ${roomId}`);
         } catch (error) {
-          io.to(userSocketMap[userId]).emit('ImageProblem', 'Network Error');
           console.error('Error in message handling:', error);
+          io.to(`user:${fromId}`).emit('ImageProblem', 'Network Error');
         }
       }
     );
 
-    //=====ON DICONNECTING THE SOCKET WE WILL DELETE THE USER FROM ONLINE USERS
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
       console.log('User disconnected', socket.id);
-      delete userSocketMap[userId];
-      io.emit('getOnlineUsers', Object.keys(userSocketMap));
+      if (!userId) return;
+      try {
+        // Mark offline only once this user has no sockets left anywhere
+        // (multi-tab / multi-device safe). fetchSockets() spans all instances
+        // when the Redis adapter is active.
+        const remaining = await io.in(`user:${userId}`).fetchSockets();
+        if (remaining.length === 0) {
+          await removeOnline(userId);
+          await broadcastOnline();
+        }
+      } catch (e) {
+        await removeOnline(userId).catch(() => {});
+      }
     });
   });
 };
