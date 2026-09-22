@@ -1,10 +1,15 @@
 const express = require('express');
 const authRouter = express.Router();
+const crypto = require('crypto');
 const User = require('../models/User');
 const { validateData } = require('../helpers/Validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 var validator = require('validator');
+const sendEmail = require('../helpers/sendEmail');
+
+const OTP_TTL_MS = 10 * 60 * 1000; // OTP is valid for 10 minutes
+const OTP_RESEND_COOLDOWN_MS = 60 * 1000; // at most one OTP per minute
 
 //=================================Sign Up user
 
@@ -94,17 +99,98 @@ authRouter.post('/auth/logout', async (req, res) => {
   res.send('Logout Successfully');
 });
 
-authRouter.patch('/forgetPassword', async (req, res) => {
-
+// Step 1: request a one-time code sent to the account's email. Required
+// before /forgetPassword will accept a new password - otherwise anyone who
+// knows a user's email could reset their password with no verification.
+authRouter.post('/auth/forgetPassword/send-otp', async (req, res) => {
   try {
     const emailId = req.body.emailId;
-    const userData = await User.findOne({
-      email: emailId,
-    });
+    if (!emailId) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const userData = await User.findOne({ email: emailId }).select(
+      '+resetOtpExpires'
+    );
     if (!userData) {
       return res.status(400).json({
         message: 'Account with given email not exist!!',
       });
+    }
+
+    // Cooldown: a previous OTP is still valid for more than (TTL - cooldown),
+    // i.e. it was issued less than `OTP_RESEND_COOLDOWN_MS` ago.
+    if (
+      userData.resetOtpExpires &&
+      userData.resetOtpExpires.getTime() - Date.now() >
+        OTP_TTL_MS - OTP_RESEND_COOLDOWN_MS
+    ) {
+      return res.status(429).json({
+        message: 'Please wait a bit before requesting another code.',
+      });
+    }
+
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    userData.resetOtpHash = await bcrypt.hash(otp, 10);
+    userData.resetOtpExpires = new Date(Date.now() + OTP_TTL_MS);
+    await userData.save();
+
+    const result = await sendEmail.run(
+      'Your Tinder password reset code',
+      `Your password reset code is ${otp}. It expires in 10 minutes. If you didn't request this, you can ignore this email.`,
+      { to: emailId }
+    );
+
+    if (result.error) {
+      return res.status(502).json({
+        message: 'Failed to send the reset code. Please try again shortly.',
+      });
+    }
+    if (result.message) {
+      // Email transport not configured server-side.
+      return res.status(503).json({ message: 'Email service is not configured.' });
+    }
+
+    res.json({ message: 'A reset code has been sent to your email.' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Step 2: verify the code and set the new password.
+authRouter.patch('/forgetPassword', async (req, res) => {
+
+  try {
+    const emailId = req.body.emailId;
+    const otp = req.body.otp;
+
+    if (!otp) {
+      return res.status(400).json({ message: 'Reset code is required.' });
+    }
+
+    const userData = await User.findOne({ email: emailId }).select(
+      '+resetOtpHash +resetOtpExpires'
+    );
+    if (!userData) {
+      return res.status(400).json({
+        message: 'Account with given email not exist!!',
+      });
+    }
+
+    if (
+      !userData.resetOtpHash ||
+      !userData.resetOtpExpires ||
+      userData.resetOtpExpires.getTime() < Date.now()
+    ) {
+      return res.status(400).json({
+        message: 'Reset code expired or not requested. Please request a new one.',
+      });
+    }
+
+    const otpMatches = await bcrypt.compare(String(otp), userData.resetOtpHash);
+    if (!otpMatches) {
+      return res.status(400).json({ message: 'Invalid reset code.' });
     }
 
     const plainPassword = req.body.password;
@@ -117,6 +203,8 @@ authRouter.patch('/forgetPassword', async (req, res) => {
     const encryptedPassword = await bcrypt.hash(plainPassword, 10);
 
     userData.password = encryptedPassword;
+    userData.resetOtpHash = null;
+    userData.resetOtpExpires = null;
 
     await userData.save();
     res.send('Password Updated Successfully!!');

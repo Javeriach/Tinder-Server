@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const { validateEditUpdates } = require('../helpers/Validator');
 const bcrypt = require('bcrypt');
 var validator = require('validator');
+const cloudinary = require('../lib/cloudinary');
 
 //GETTING THE USER DATA FROM THE DATABASE
 profileRouter.get('/profile/view', authentication, async (req, res) => {
@@ -16,6 +17,26 @@ profileRouter.get('/profile/view', authentication, async (req, res) => {
   } catch (err) {
     console.log(err.message);
     res.status(500).send('Something went wrong');
+  }
+});
+
+// Upload a profile photo (sent as a base64 data URL) to Cloudinary and
+// return its hosted URL - the frontend then saves that URL via /profile/edit.
+profileRouter.post('/profile/uploadPhoto', authentication, async (req, res) => {
+  try {
+    const { image } = req.body;
+    if (!image) {
+      return res.status(400).json({ message: 'No image provided.' });
+    }
+
+    const uploadResponse = await cloudinary.uploader.upload(image, {
+      folder: 'tinder/profile-photos',
+    });
+
+    res.json({ url: uploadResponse.secure_url });
+  } catch (error) {
+    console.error('profile/uploadPhoto error:', error.message);
+    res.status(500).json({ message: 'Photo upload failed. Please try again.' });
   }
 });
 

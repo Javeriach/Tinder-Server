@@ -39,6 +39,10 @@ app.use(
 // so this must be registered before the JSON body parser.
 app.use('/payment/webhook', express.raw({ type: 'application/json' }));
 
+// Profile photo uploads arrive as a base64 data URL, which needs a higher
+// body-size limit than the rest of the API's small JSON payloads.
+app.use('/profile/uploadPhoto', express.json({ limit: '8mb' }));
+
 app.use(express.json());
 app.use(cookieParser());
 

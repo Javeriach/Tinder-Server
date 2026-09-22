@@ -69,6 +69,33 @@ const userSchema = mongoose.Schema(
       type: String,
       default: '',
     },
+
+    premiumExpiresAt: {
+      type: Date,
+      default: null,
+    },
+
+    stripeCustomerId: {
+      type: String,
+      default: null,
+    },
+
+    stripeSubscriptionId: {
+      type: String,
+      default: null,
+    },
+
+    resetOtpHash: {
+      type: String,
+      default: null,
+      select: false,
+    },
+
+    resetOtpExpires: {
+      type: Date,
+      default: null,
+      select: false,
+    },
   },
   {
     timestamps: true,

@@ -3,6 +3,24 @@ const sendEmail = require('./sendEmail.js');
 const { renderEmail, appUrl } = require('./emailTemplate.js');
 const { startOfDay, endOfDay, subDays } = require('date-fns'); // Import necessary functions
 const ConnectionRequest = require('../models/connectionrequest.js');
+const User = require('../models/User.js');
+
+// Safety net: if a Stripe subscription webhook is ever missed, this catches
+// users whose premium period has already lapsed and downgrades them. Only
+// runs on a long-lived process (see index.js) - not on Vercel serverless.
+cron.schedule('*/30 * * * *', async () => {
+  try {
+    const result = await User.updateMany(
+      { isPremium: true, premiumExpiresAt: { $ne: null, $lt: new Date() } },
+      { $set: { isPremium: false, membershipType: '' } }
+    );
+    if (result.modifiedCount) {
+      console.log(`Downgraded ${result.modifiedCount} expired premium user(s)`);
+    }
+  } catch (error) {
+    console.error('Premium expiry cron error:', error);
+  }
+});
 
 // Schedule the cron job to run at the 42nd minute of every hour
 cron.schedule(' 23 9 * * * *', async () => {

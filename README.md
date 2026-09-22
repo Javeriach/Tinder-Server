@@ -41,9 +41,18 @@ The backend is built using **Node.js** and **Express.js**, providing a fast and 
 - **Stripe Checkout** (hosted payment page) + **signed webhook** to confirm payment and upgrade the user
 - **Transaction Logs Stored in Database**
 
-Flow: `POST /payment/create` → returns a Stripe Checkout `url` → frontend redirects the
-browser there → Stripe redirects back to `FRONTEND_URL/premium?payment=success` →
-`POST /payment/webhook` verifies the `checkout.session.completed` event and sets `isPremium`.
+Flow: `POST /payment/create` → returns a Stripe Checkout `url` (monthly subscription) →
+frontend redirects the browser there → Stripe redirects back to
+`FRONTEND_URL/premium?payment=success` → `POST /payment/webhook` verifies the event and
+sets `isPremium` + `premiumExpiresAt`. `POST /payment/cancel` schedules cancellation at
+the end of the current billing period.
+
+The webhook must receive these event types (not just `checkout.session.completed`) for
+renewals and cancellations to be reflected:
+- `checkout.session.completed`
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
 
 | Variable | Required | Description |
 | --- | --- | --- |
@@ -59,8 +68,11 @@ npm test              # unit + integration tests for the payment routes (offline
 npm run payment:test  # creates a real test-mode Checkout Session and prints its URL
 
 # Local webhook forwarding (separate terminal, requires the Stripe CLI):
+# `stripe listen` forwards ALL event types by default - no extra config needed.
 stripe listen --forward-to localhost:7777/payment/webhook
 stripe trigger checkout.session.completed
+stripe trigger customer.subscription.updated
+stripe trigger customer.subscription.deleted
 ```
 
 ### 📧 Email Notifications (Resend)
