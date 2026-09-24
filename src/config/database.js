@@ -20,7 +20,17 @@ let cached = global.__mongooseConn;
 if (!cached) cached = global.__mongooseConn = { conn: null, promise: null };
 
 const connectDB = async () => {
-  if (cached.conn) return cached.conn;
+  // readyState 1 = connected. A cached connection can still exist here but
+  // have gone stale (e.g. the network silently reset an idle socket) -
+  // reusing it blindly would keep failing every request with ECONNRESET
+  // until the process restarts, so verify it's actually alive first.
+  if (cached.conn && cached.conn.connection.readyState === 1) {
+    return cached.conn;
+  }
+  if (cached.conn) {
+    cached.conn = null;
+    cached.promise = null;
+  }
 
   if (!cached.promise) {
     if (!process.env.MONGODB_CONNECTION_STRING) {

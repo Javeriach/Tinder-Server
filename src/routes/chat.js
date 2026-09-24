@@ -141,6 +141,13 @@ chatRouter.get(
             ],
           },
         ];
+      } else {
+        // Opening a chat means the user has now seen its messages - record
+        // that so /notifications doesn't keep resurfacing it after reload.
+        await Chat.updateOne(
+          { participants: { $all: [userId, targetUserId] } },
+          { $set: { [`lastRead.${userId}`]: new Date() } }
+        );
       }
 
       res.json(chat);
@@ -202,6 +209,46 @@ chatRouter.get('/contacts', authentication, async (req, res) => {
     ]);
 
     res.json(contacts);
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+});
+
+//ROUTE TO GET UNREAD-MESSAGE NOTIFICATIONS (survives reload/reconnect, unlike
+//the purely in-memory socket-driven notification list)
+chatRouter.get('/notifications', authentication, async (req, res) => {
+  try {
+    const userId = String(req.body.userData._id);
+
+    const chats = await Chat.find({ participants: req.body.userData._id })
+      .populate('messages.senderId', 'firstName lastName photoUrl')
+      .lean();
+
+    const notifications = [];
+    for (const chat of chats) {
+      const lastMessage = chat.messages?.[chat.messages.length - 1];
+      if (!lastMessage || !lastMessage.senderId) continue;
+      if (String(lastMessage.senderId._id) === userId) continue; // last message is mine
+
+      const lastReadAt = chat.lastRead?.[userId]
+        ? new Date(chat.lastRead[userId])
+        : new Date(0);
+      if (new Date(lastMessage.createdAt) <= lastReadAt) continue; // already read
+
+      notifications.push({
+        senderId: lastMessage.senderId._id,
+        roomId: chat.roomId,
+        firstName: lastMessage.senderId.firstName,
+        lastName: lastMessage.senderId.lastName,
+        photoUrl: lastMessage.senderId.photoUrl,
+        msg: lastMessage.text || '📷Photo',
+        time: lastMessage.createdAt,
+      });
+    }
+
+    notifications.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+    res.json(notifications);
   } catch (error) {
     res.status(500).json({ msg: error.message });
   }

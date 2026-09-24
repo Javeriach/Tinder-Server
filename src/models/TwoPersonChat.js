@@ -32,6 +32,14 @@ const chatSchema = new moongoose.Schema(
       },
     ],
     messages: [messageSchema],
+    // Per-participant "I have seen messages up to this time" marker, keyed by
+    // userId (as a string). Lets us derive unread notifications on load,
+    // instead of relying purely on the live socket connection.
+    lastRead: {
+      type: Map,
+      of: Date,
+      default: {},
+    },
   },
   { timestamps: true }
 );

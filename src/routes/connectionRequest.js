@@ -22,25 +22,28 @@ requestRouter.post(
         return res.status(400).send('ERROR: Invalid status request');
       }
 
-      //***CHECK WHETHER THE OTHER USER EXIT IN DB OR NOT */
-      const receiverData = await User.findOne({ _id: toUserId });
+      //***CHECK WHETHER THE OTHER USER EXISTS AND WHETHER A CONNECTION ALREADY
+      //EXISTS - these two reads are independent, so run them in parallel
+      //instead of waiting on one before starting the other.
+      const [receiverData, existingConnectionRequest] = await Promise.all([
+        User.findOne({ _id: toUserId }),
+        ConnectionRequest.findOne({
+          $or: [
+            {
+              toUserId,
+              fromUserId,
+            },
+            {
+              toUserId: fromUserId,
+              fromUserId: toUserId,
+            },
+          ],
+        }),
+      ]);
+
       if (!receiverData) {
         return res.status(400).json({ message: 'Receiver not Exit!!' });
       }
-
-      //** CHECK WHETHER THE CONNECTION EXIST OR NOT*/
-      const existingConnectionRequest = await ConnectionRequest.findOne({
-        $or: [
-          {
-            toUserId,
-            fromUserId,
-          },
-          {
-            toUserId: fromUserId,
-            fromUserId: toUserId,
-          },
-        ],
-      });
 
       if (existingConnectionRequest) {
         return res
